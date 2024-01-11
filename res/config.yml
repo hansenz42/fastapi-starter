@@ -1,0 +1,16 @@
+env: dev
+log_level: debug
+version: 0.1-2024-01-11
+
+# 服务器地址和端口号
+server:
+  port: 8082
+  host: 0.0.0.0
+
+log:
+  # 是否将日志输出到文件
+  to_file: false
+  # out 文件路径
+  output: /var/log/zhorizon-middleware-out.log
+  # 错误 err 文件路径
+  error: /var/log/zhorizon-middleware-err.log

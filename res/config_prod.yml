@@ -1,0 +1,2 @@
+env: prod
+log_level: debug
