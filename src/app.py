@@ -42,7 +42,8 @@ async def http_exception_handler(request, exc):
     :param exc:
     :return:
     """
-    return res_error(code=exc.status_code, msg=exc.detail)
+    logger.error(f"HTTP 错误: {exc}")
+    return res_error(code=exc.status_code, msg="发生 http 错误")
 
 
 @app.exception_handler(RequestValidationError)
