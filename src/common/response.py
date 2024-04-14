@@ -51,10 +51,4 @@ def res_server_error(*, message: str = "服务器错误") -> Response:
     :param message:
     :return:
     """
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            'code': 500,
-            'msg': message
-        }
-    )
+    return res_error(code=500, msg=message)
