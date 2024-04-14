@@ -45,10 +45,10 @@ def res_bad_request(*, msg: str = "参数错误") -> Response:
     )
 
 
-def res_server_error(*, message: str = "服务器错误") -> Response:
+def res_server_error(*, msg: str = "服务器错误") -> Response:
     """
     服务器错误
-    :param message:
+    :param msg:
     :return:
     """
-    return res_error(code=500, msg=message)
+    return res_error(code=500, msg=msg)
