@@ -51,14 +51,17 @@ class ConfigManager:
 
         self.config_content = deep_merge_dict(self.config_content, patch_config)
 
-    def get_value(self, path: List[str]) -> any:
+    def get_value(self, *args, **kwargs) -> any:
         """
         获取配置文件中的值
         """
         if self.config_content is None:
             return IOError("配置文件未加载")
 
-        return get_key_in_config(self.config_content, path, 0)
+        # 将 args 转为 list[str]
+        args_str = [str(arg) for arg in args]
+
+        return get_key_in_config(self.config_content, args_str, 0)
 
 
 config_manager: ConfigManager = ConfigManager()

@@ -117,7 +117,7 @@ from component.ConfigManager import config_manager
 
 # 获取 yaml 中配置的变量 foo.bar
 try:
-    config_str = config_manager.get_value(['foo', 'bar'])
+    config_str = config_manager.get_value('foo', 'bar')
     # > test_paramter
     print(config_str)
 except KeyError:

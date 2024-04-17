@@ -15,7 +15,7 @@ logger = log_manager.get_logger("app")
 
 app = FastAPI()
 
-logger.info(f"服务已启动：version: {config_manager.get_value(['version'])}")
+logger.info(f"服务已启动：version: {config_manager.get_value('version')}")
 
 # 引入路由
 from route.demo import router as demo_router
@@ -30,7 +30,7 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    return f"服务已部署，version：{config_manager.get_value(['version'])}"
+    return f"服务已部署，version：{config_manager.get_value('version')}"
 
 # 错误处理部分代码
 

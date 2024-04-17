@@ -14,7 +14,7 @@ class LogManager:
     """
 
     def __init__(self):
-        log_level = config_manager.get_value(['log_level'])
+        log_level = config_manager.get_value('log_level')
 
         self.root_logger = logging.getLogger()
         if log_level == 'info':
@@ -42,14 +42,14 @@ class LogManager:
 
         # 根据配置文件判断，是否要写入到文件
         try:
-            if config_manager.get_value(['log', 'to_file']):
+            if config_manager.get_value('log', 'to_file'):
                 # 写入到文件 (out)
-                file_handler_out = logging.FileHandler(config_manager.get_value(['log', 'output']))
+                file_handler_out = logging.FileHandler(config_manager.get_value('log', 'output'))
                 file_handler_out.setLevel(logging.DEBUG)
                 file_handler_out.setFormatter(formatter)
 
                 # 写入到文件 (err)
-                file_handler_err = logging.FileHandler(config_manager.get_value(['log', 'error']))
+                file_handler_err = logging.FileHandler(config_manager.get_value('log', 'error'))
                 file_handler_err.setLevel(logging.WARNING)
                 file_handler_err.setFormatter(formatter)
 
