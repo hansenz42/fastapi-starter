@@ -8,6 +8,9 @@
 
 本项目基于以下项目修改：[hansenz42/python-project-starter: 一个在 poetry 基础上的 Python 项目框架，自带配置文件管理和日志管理功能](https://github.com/hansenz42/python-project-starter)
 
+# 更新记录 
+- 2024-04-30 使用更规范的 pydantic 作为返回值取代之前直接 JSONResponse 的方式。需要对原有 route 做改动。如果不需要该特性，请不要更新，避免影响已有代码 
+
 # 功能
 
 - 集成 fastapi 作为 web 服务器

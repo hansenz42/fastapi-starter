@@ -1,11 +1,8 @@
-import asyncio
-
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import PlainTextResponse, JSONResponse
-from common.response import res_bad_request, res_error
+from common.response import BadRequestResponse, ServerErrorResponse
 from component.ConfigManager import config_manager
 
 # 启动 FastAPI http 服务器
@@ -34,6 +31,7 @@ async def root():
 
 # 错误处理部分代码
 
+
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
     """
@@ -43,7 +41,7 @@ async def http_exception_handler(request, exc):
     :return:
     """
     logger.error(f"HTTP 错误: {exc}")
-    return res_error(code=exc.status_code, msg="发生 http 错误")
+    return ServerErrorResponse(code=exc.status_code, msg="发生 http 错误")
 
 
 @app.exception_handler(RequestValidationError)
@@ -55,4 +53,4 @@ async def validation_exception_handler(request: Request, exc):
     :return:
     """
     logger.warning(f"收到无效 body：{exc}")
-    return res_bad_request(msg='无效body')
+    return BadRequestResponse(msg="无效 body")
