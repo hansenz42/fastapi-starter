@@ -100,19 +100,21 @@ app.include_router(demo_router, prefix="/api/v1/demo", tags=["demo"])
 ```python
 # 例如，在 src/service 目录下写了一个 demo_service.py 文件，在其他文件中引入
 # 引入的文件路径不写 src，直接从 service 开始即可
-from server.demo_service import foo
+from service.demo_service import foo
 ```
+
+具体示例可见 `src/app.py`
 
 ### 7.3 在代码中引入项目变量
 
-在 `config_xxx.yml` 设置一个项目变量 （xxx 为你要配置的环境）
+在 `res/config_xxx.yml` 设置一个项目变量 （xxx 为你要配置的环境）
 
 ```yaml
 foo: 
   bar: 'test_paramter'
 ```
 
-可在代码中使用以下方式引入，yaml 中的层级用字符串列表表示：
+可在代码中使用以下方式引入 yml 中的变量：
 
 ```python
 # 引入 ConfigManager
