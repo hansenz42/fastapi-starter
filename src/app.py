@@ -4,6 +4,7 @@ from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from common.response import BadRequestResponse, ServerErrorResponse
 from component.ConfigManager import config_manager
+from contextlib import asynccontextmanager
 
 # 启动 FastAPI http 服务器
 from component.LogManager import log_manager
@@ -12,22 +13,22 @@ logger = log_manager.get_logger("app")
 
 app = FastAPI()
 
-logger.info(f"服务已启动：version: {config_manager.get_value('version')}")
+logger.info(f"service loaded: {config_manager.get_value('version')}")
 
-# 引入路由
-from route.demo import router as demo_router
-app.include_router(demo_router, prefix="/api/v1/demo", tags=["demo"])
-
+from route.user_v1 import router as user_router
+app.include_router(user_router, prefix="/api/user/v1", tags=["user"])
 
 
-@app.on_event("startup")
-async def startup_event():
-    logger.info("服务启动")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("service started")
+    yield
+    logger.info("service stopped")
 
 
 @app.get("/")
 async def root():
-    return f"服务已部署，version：{config_manager.get_value('version')}"
+    return f"service deployed，version：{config_manager.get_value('version')}"
 
 # 错误处理部分代码
 
@@ -40,8 +41,8 @@ async def http_exception_handler(request, exc):
     :param exc:
     :return:
     """
-    logger.error(f"HTTP 错误: {exc}")
-    return ServerErrorResponse(code=exc.status_code, msg="发生 http 错误")
+    logger.error(f"HTTP error: {exc}")
+    return ServerErrorResponse(code=exc.status_code, msg="http error")
 
 
 @app.exception_handler(RequestValidationError)
@@ -52,5 +53,5 @@ async def validation_exception_handler(request: Request, exc):
     :param exc:
     :return:
     """
-    logger.warning(f"收到无效 body：{exc}")
-    return BadRequestResponse(msg="无效 body")
+    logger.warning(f"received invalid body：{exc}")
+    return BadRequestResponse(msg="invalid body")
