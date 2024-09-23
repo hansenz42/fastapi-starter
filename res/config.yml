@@ -7,6 +7,10 @@ server:
   port: 8082
   host: 0.0.0.0
 
+sql:
+  url: postgresql+asyncpg://travel_agent:%s@localhost/travel_agent
+  password: '!PYVX2RRhw3GqA'
+
 log:
   # 是否将日志输出到文件
   to_file: false

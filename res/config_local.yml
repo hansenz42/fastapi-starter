@@ -1,0 +1,2 @@
+env: local
+log_level: debug

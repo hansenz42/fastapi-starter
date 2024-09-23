@@ -7,7 +7,7 @@ import getopt
 ENV = None
 
 # 在此列表中加入添加你自己的环境变量
-VALID_ENVS = ['dev', 'prod', 'test']
+VALID_ENVS = ['local', 'dev', 'prod', 'test']
 
 
 def is_valid_env_candidate_str(candidate: str):
@@ -43,8 +43,8 @@ def use_arg_env():
 
 def use_default_env():
     global ENV
-    ENV = 'dev'
-    print('未传递环境变量，使用默认环境变量 dev')
+    ENV = 'local'
+    print('未传递环境变量，使用默认环境变量 local')
 
 
 use_arg_env()
