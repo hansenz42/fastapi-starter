@@ -8,6 +8,22 @@ from component.LogManager import log_manager
 
 log = log_manager.get_logger(__name__)
 
+TARGET_WIDTH = 600
+TARGET_HEIGHT = 800
+
+def resize_img(image: np.ndarray) -> np.ndarray:
+    orig_width, orig_height = image.shape[1], image.shape[0]
+    aspect_ratio = orig_width / orig_height
+
+    if aspect_ratio > 1:  # width larger than height, resize according to width
+        new_width = TARGET_WIDTH
+        new_height = int(TARGET_WIDTH / aspect_ratio)
+    else:  # otherwise...
+        new_height = TARGET_HEIGHT
+        new_width = int(TARGET_HEIGHT * aspect_ratio)
+
+    resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    return resized_image
 
 class ImageRecService:
     def __init__(self):
@@ -165,3 +181,10 @@ if 'pytest' in sys.modules:
         """
         score = await image_service.recognize_with_select_po('../../sample/2_pos.jpg', 'test_poi2')
         print(score)
+
+    def test_resize_img():
+        image = cv2.imread('../../sample/2_pos.JPG')
+        resized_img = resize_img(image)
+        cv2.imshow('Resized Image', resized_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
