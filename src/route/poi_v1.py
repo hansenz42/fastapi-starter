@@ -13,7 +13,7 @@ def nearby():
     router for nearby position of interest
     :return:
     """
-    return OkResponse(msg="test ok")
+    return OkResponse(msg='test ok')
 
 class ImageRecRequestDto(BaseModel):
     lat: float
@@ -26,3 +26,20 @@ def image_rec():
     router for image recognition api
     :return:
     """
+    return OkResponse(msg='test ok')
+
+class PoiAddRequestDto(BaseModel):
+    uuid: str
+    name: str
+    lat: float
+    long: float
+    ssid: str
+    content: str
+
+@router.post("/poi")
+def add_poi():
+    """
+    router for recording new poi
+    :return:
+    """
+    return OkResponse(msg='test ok')

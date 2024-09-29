@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "fastapi-starter"
+name = "travel-agent-py"
 version = "0.1.0"
 description = ""
 authors = ["Hansen <xxx@xxx.com>"]
@@ -15,10 +15,14 @@ pyyaml = "^6.0"
 pytest = "^8.3.3"
 fastapi = "^0.115.0"
 uvicorn = "^0.30.0"
-opencv-python = "^4.10.0.84"
 sqlalchemy = "^2.0.35"
 asyncpg = "^0.29.0"
 pytest-asyncio = "^0.24.0"
+opencv-python = "^4.6"
+
+
+[tool.poetry.group.dev.dependencies]
+opencv = {path = "/Users/hans/pkg/opencv-4.10.0/build/python_loader"}
 
 
 [build-system]

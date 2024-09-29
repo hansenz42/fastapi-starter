@@ -11,8 +11,9 @@ class PoiPo(BasePo):
     thumbnail = Column(String)
     lat = Column(Float)
     long = Column(Float)
-    content = Column(String)
-    identify_image = Column(String)
+    ssid = Column(String(255))
+    text_content = Column(String)
+    img_list = Column(String)
 
     created_at = Column(DateTime)
     modified_at = Column(DateTime)

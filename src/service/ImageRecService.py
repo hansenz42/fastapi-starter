@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import pickle
+
+from numpy.ma.core import resize
+
 from dao.PoiWIdentifiedImageDao import poi_w_identified_image_dao
 from common.uuid import gen_uuid
 from entity.po.PoiWIdentifyImagePo import PoiWIdentifyImagePo
@@ -8,8 +11,12 @@ from component.LogManager import log_manager
 
 log = log_manager.get_logger(__name__)
 
+# restrict image size
 TARGET_WIDTH = 600
 TARGET_HEIGHT = 800
+
+HESSIAN_THRESHOLD = 4000
+
 
 def resize_img(image: np.ndarray) -> np.ndarray:
     orig_width, orig_height = image.shape[1], image.shape[0]
@@ -25,22 +32,21 @@ def resize_img(image: np.ndarray) -> np.ndarray:
     resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
     return resized_image
 
+
 class ImageRecService:
     def __init__(self):
         pass
 
-    async def recognize_with_select_po(self, input_image: str, poi_uuid: str):
+    async def recognize_with_select_poi(self, input_image: str, poi_uuid: str):
         """
         USED FOR TEST PURPOSE
         :param input_image:
         :param poi_uuid:
         :return:
         """
-        input_img = cv2.imread(input_image, cv2.IMREAD_GRAYSCALE)
-
-        # calculated selected image features
-        sift = cv2.SIFT_create()
-        keypoints, descriptors = sift.detectAndCompute(input_img, None)
+        # keypoints, descriptors = self.calculate_feature_orb(input_image)
+        image = self.read_img(input_image)
+        keypoints, descriptors = self.calculate_feature_surf(image)
 
         # get features from db
         result = await self.load_features_from_db(poi_uuid=poi_uuid)
@@ -49,7 +55,16 @@ class ImageRecService:
         score = self.match(keypoints, candidate[0], descriptors, candidate[1])
         return score
 
-    def match(self, keypoints1, keypoints2, descriptors1, descriptors2) -> int:
+    def match(self, keypoints1: list[cv2.KeyPoint], keypoints2: list[cv2.KeyPoint], descriptors1: np.ndarray,
+              descriptors2: np.ndarray) -> int:
+        """
+        matching two images using bf matcher algorithm
+        :param keypoints1:
+        :param keypoints2:
+        :param descriptors1:
+        :param descriptors2:
+        :return:
+        """
         bf = cv2.BFMatcher(cv2.NORM_L2)
 
         matches = bf.match(descriptors1, descriptors2)
@@ -67,12 +82,48 @@ class ImageRecService:
 
         return similarity_score
 
-    def calculate_feature(self, image_path: str) -> (cv2.KeyPoint, np.ndarray):
-        image = cv2.imread(image_path)
-        sift = cv2.SIFT_create()
+    def show_match(self, image1: np.ndarray, image2: np.ndarray, keypoints1: list[cv2.KeyPoint],
+                   keypoints2: list[cv2.KeyPoint], descriptors1: np.ndarray, descriptors2: np.ndarray):
+        bf = cv2.BFMatcher(cv2.NORM_L2)
 
+        matches = bf.match(descriptors1, descriptors2)
+        matches = sorted(matches, key=lambda x: x.distance)
+
+        if len(matches) > 4:
+            src_pts = np.float32([keypoints1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32([keypoints2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+
+            H, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+
+            matchesMask = mask.ravel().tolist()
+            similarity_score = sum(matchesMask) / len(matchesMask) if matchesMask else 0
+            print(similarity_score)
+
+            matched_image = cv2.drawMatches(image1, keypoints1, image2, keypoints2, matches, None,
+                                            matchesMask=matchesMask)
+            cv2.imshow('image matching', matched_image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        return
+
+    def read_img(self, image_path: str) -> np.ndarray:
+        image = cv2.imread(image_path)
+        return resize_img(image)
+
+    def calculate_feature_sift(self, image: np.ndarray) -> (cv2.KeyPoint, np.ndarray):
+        sift = cv2.SIFT_create()
         keypoints, descriptors = sift.detectAndCompute(image, None)
-        log.debug("calculated feature from image file, image_path=%s", image_path)
+        return keypoints, descriptors
+
+    def calculate_feature_orb(self, image: np.ndarray) -> (cv2.KeyPoint, np.ndarray):
+        orb = cv2.ORB_create()
+        keypoints = orb.detect(image, None)
+        keypoints, descriptors = orb.compute(image, keypoints)
+        return keypoints, descriptors
+
+    def calculate_feature_surf(self, image: np.ndarray) -> (cv2.KeyPoint, np.ndarray):
+        surf = cv2.xfeatures2d.SURF_create(hessianThreshold=HESSIAN_THRESHOLD)
+        keypoints, descriptors = surf.detectAndCompute(image, None)
         return keypoints, descriptors
 
     def save_feature_to_file(self, keypoints: list[cv2.KeyPoint], descriptors: np.ndarray, file_path: str):
@@ -94,17 +145,18 @@ class ImageRecService:
         fs.release()
         return keypoints, descriptors
 
-    async def save_features_to_db(self, keypoints: list[cv2.KeyPoint], descriptors: np.ndarray, poi_uuid: str):
+    async def save_features_to_db(self, keypoints: list[cv2.KeyPoint], descriptors: np.ndarray, poi_uuid: str, algorithm: str):
         serialized_array = pickle.dumps(keypoints_to_array(keypoints))
         serialized_descriptors = pickle.dumps(descriptors)
         new_uuid = gen_uuid()
 
-        await poi_w_identified_image_dao.add_identified_image(image_url='', keypoints=serialized_array,
-                                                              descriptors=serialized_descriptors, poi_uuid=poi_uuid,
-                                                              image_uuid=new_uuid)
+        await poi_w_identified_image_dao.add(image_url='', algorithm=algorithm, keypoints=serialized_array,
+                                             descriptors=serialized_descriptors, poi_uuid=poi_uuid,
+                                             image_uuid=new_uuid)
 
     async def load_features_from_db(self, poi_uuid: str) -> list[tuple[list[cv2.KeyPoint], np.ndarray]]:
-        result: list[PoiWIdentifyImagePo] = await poi_w_identified_image_dao.get_identified_images_by_poi(poi_uuid=poi_uuid)
+        result: list[PoiWIdentifyImagePo] = await poi_w_identified_image_dao.get_identified_images_by_poi(
+            poi_uuid=poi_uuid)
         ret: list[tuple[list[cv2.KeyPoint], np.ndarray]] = []
         for item in result:
             kp_array = pickle.loads(item.keypoints)
@@ -112,6 +164,7 @@ class ImageRecService:
             descriptors: np.ndarray = pickle.loads(item.descriptors)
             ret.append((kp, descriptors))
         return ret
+
 
 def keypoints_to_array(keypoints: list[cv2.KeyPoint]) -> np.ndarray:
     kp_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in keypoints]
@@ -146,7 +199,7 @@ if 'pytest' in sys.modules:
         rec and save files
         :return:
         """
-        keypoints, descriptors = image_service.calculate_feature('../../sample/3.jpeg')
+        keypoints, descriptors = image_service.calculate_feature_sift('../../sample/3.jpeg')
         print(keypoints[0].size)
         image_service.save_feature_to_file(keypoints, descriptors, '../../cache/keypoints.xml')
 
@@ -159,14 +212,19 @@ if 'pytest' in sys.modules:
         keypoints, descriptors = image_service.read_feature_to_file('../../cache/keypoints.xml')
         print(keypoints[0].size)
 
+
     @pytest.mark.asyncio
     async def test_feature_save_db():
         """
         :return:
         """
-        keypoints, descriptors  = image_service.calculate_feature('../../sample/2.jpg')
-        await image_service.save_features_to_db(keypoints, descriptors, 'test_poi2')
+        image = image_service.read_img('../../sample/2_crop.jpeg')
+        # keypoints, descriptors  = image_service.calculate_feature_sift(image)
+        # keypoints, descriptors = image_service.calculate_feature_orb(image)
+        keypoints, descriptors = image_service.calculate_feature_surf(image)
+        await image_service.save_features_to_db(keypoints, descriptors, 'test_poi2', 'surf')
         print('done')
+
 
     @pytest.mark.asyncio
     async def test_feature_load_db():
@@ -179,8 +237,9 @@ if 'pytest' in sys.modules:
         """
         :return:
         """
-        score = await image_service.recognize_with_select_po('../../sample/2_pos.jpg', 'test_poi2')
+        score = await image_service.recognize_with_select_poi('../../sample/2.jpeg', 'test_poi2_resized_surf_crop')
         print(score)
+
 
     def test_resize_img():
         image = cv2.imread('../../sample/2_pos.JPG')
@@ -188,3 +247,49 @@ if 'pytest' in sys.modules:
         cv2.imshow('Resized Image', resized_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+
+    def test_show_orb_image_feature():
+        image = image_service.read_img('../../sample/2_pos.jpeg')
+        keypoints, descriptors = image_service.calculate_feature_sift(image)
+        # 绘制关键点
+        image_with_keypoints = cv2.drawKeypoints(image, keypoints, None, color=(0, 255, 0),
+                                                 flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+        # 显示图片
+        cv2.imshow('ORB Keypoints', image_with_keypoints)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
+    def test_show_surf_image_feature():
+        image = image_service.read_img('../../sample/2_crop.jpeg')
+        keypoints, descriptors = image_service.calculate_feature_surf(image)
+        # 绘制关键点
+        image_with_keypoints = cv2.drawKeypoints(image, keypoints, None, color=(0, 255, 0),
+                                                 flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+        # 显示图片
+        cv2.imshow('SURF Keypoints', image_with_keypoints)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
+    def test_show_image_matching_surf():
+        image1 = image_service.read_img('../../sample/2_crop.jpeg')
+        image2 = image_service.read_img('../../sample/1.jpeg')
+
+        keypoints1, descriptors1 = image_service.calculate_feature_surf(image1)
+        keypoints2, descriptors2 = image_service.calculate_feature_surf(image2)
+
+        image_service.show_match(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2)
+
+
+    def test_show_image_matching_sift():
+        image1 = image_service.read_img('../../sample/cow_pos.jpeg')
+        image2 = image_service.read_img('../../sample/yuqi_target.jpg')
+
+        keypoints1, descriptors1 = image_service.calculate_feature_surf(image1)
+        keypoints2, descriptors2 = image_service.calculate_feature_surf(image2)
+
+        image_service.show_match(image1, image2, keypoints1, keypoints2, descriptors1, descriptors2)
