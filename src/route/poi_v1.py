@@ -1,11 +1,11 @@
+# routers for process poi information, and poi crud
+
 from fastapi import APIRouter, Request, HTTPException, Header
 from common.response import OkResponse
-from pydantic import BaseModel
-router = APIRouter()
+from entity.dto.poi_dto import *
+from service.PoiService import poi_service
 
-class NearbyRequestDto(BaseModel):
-    lat: float
-    long: float
+router = APIRouter()
 
 @router.get("/nearby")
 def nearby():
@@ -15,11 +15,6 @@ def nearby():
     """
     return OkResponse(msg='test ok')
 
-class ImageRecRequestDto(BaseModel):
-    lat: float
-    long: float
-    image: str
-
 @router.post("/image-rec")
 def image_rec():
     """
@@ -28,18 +23,11 @@ def image_rec():
     """
     return OkResponse(msg='test ok')
 
-class PoiAddRequestDto(BaseModel):
-    uuid: str
-    name: str
-    lat: float
-    long: float
-    ssid: str
-    content: str
 
 @router.post("/poi")
-def add_poi():
+def add_poi(dto: AddPoiRequestDto):
     """
     router for recording new poi
     :return:
     """
-    return OkResponse(msg='test ok')
+    return poi_service.add_new_poi(dto)

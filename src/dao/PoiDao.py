@@ -9,9 +9,19 @@ class PoiDao:
     def __init__(self):
         self.__session_maker = sql_connection_manager.get_session_maker()
 
-    async def add_po(self, po: PoiPo):
+    async def add_po(self, name: str, lat: float, long: float, ssid: str, text_content: str, img_list: str):
         uuid = gen_uuid()
         async with self.__session_maker() as session:
+            po = PoiPo()
+            po.uuid = uuid
+            po.name = name
+            po.lat = lat
+            po.long = long
+            po.ssid = ssid
+            po.text_content = text_content
+            po.img_list = img_list
+            po.created_at = datetime.now()
+            po.modified_at = datetime.now()
             session.add(po)
             await session.commit()
         return uuid
