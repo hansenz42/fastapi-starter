@@ -1,7 +1,11 @@
+from sys import prefix
+
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.responses import JSONResponse
+
 from common.response import BadRequestResponse, ServerErrorResponse
 from component.ConfigManager import config_manager
 from contextlib import asynccontextmanager
@@ -16,7 +20,10 @@ app = FastAPI()
 logger.info(f"service loaded: {config_manager.get_value('version')}")
 
 from route.user_v1 import router as user_router
-app.include_router(user_router, prefix="/api/user/v1", tags=["user"])
+from route.media_v1 import router as media_router
+from route.poi_v1 import router as poi_router
+app.include_router(user_router, prefix="/api/user/v1", tags=['user'])
+app.include_router(media_router, prefix='/api/media/v1', tags=['media'])
 
 
 @asynccontextmanager
@@ -42,7 +49,7 @@ async def http_exception_handler(request, exc):
     :return:
     """
     logger.error(f"HTTP error: {exc}")
-    return ServerErrorResponse(code=exc.status_code, msg="http error")
+    return JSONResponse(status_code=500, content={"code": exc.status_code, "msg": exc.detail})
 
 
 @app.exception_handler(RequestValidationError)
@@ -54,4 +61,4 @@ async def validation_exception_handler(request: Request, exc):
     :return:
     """
     logger.warning(f"received invalid body：{exc}")
-    return BadRequestResponse(msg="invalid body")
+    return JSONResponse(status_code=400, content={"code": 400, "msg": "invalid body"})

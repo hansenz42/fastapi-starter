@@ -214,3 +214,6 @@ $RECYCLE.BIN/
 
 /sample
 /cache
+/uploads
+
+poetry.lock

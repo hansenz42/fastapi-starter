@@ -7,7 +7,7 @@ class PoiWIdentifyImagePo(BasePo):
 
     poi_uuid = Column(String(255))
     image_uuid = Column(String(255))
-    image_url = Column(String())
+    image_media_id = Column(String())
     algorithm = Column(String(255))
     keypoints = Column(LargeBinary)
     descriptors = Column(LargeBinary)

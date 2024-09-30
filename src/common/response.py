@@ -19,10 +19,10 @@ class OkResponse(BaseModel, Generic[T]):
 class ServerErrorResponse(BaseModel):
     code: int = 500
     msg: str = "server error"
-    data: Union[list, dict, str, None]
+    data: Union[list, dict, str, None] = None
 
 
 class BadRequestResponse(BaseModel):
     code: int = 400
     msg: str = "bad request"
-    data: Union[list, dict, str, None]
+    data: Union[list, dict, str, None] = None

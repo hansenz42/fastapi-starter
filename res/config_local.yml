@@ -1,2 +1,9 @@
 env: local
 log_level: debug
+
+sql:
+  url: postgresql+asyncpg://travel_agent:%s@localhost/travel_agent_dev
+  password: '!PYVX2RRhw3GqA'
+
+media:
+  upload: /Users/hans/repo/travel-agent-py/uploads
