@@ -36,6 +36,21 @@ class PoiService:
             img_list=po.img_list
         )
 
+    async def match_by_poi(self, poi_id: str, media_id: str):
+        """
+        match poi and media
+        :param poi_id:
+        :param media_id:
+        :return:
+        """
+        # 1. get poi images
+
+        # 2. match poi images one by one
+
+        # 3. get highest similarity score
+
+        # 4. if similarity score > 0.1, return good else return bad
+
 
 poi_service: PoiService = PoiService()
 

@@ -34,9 +34,10 @@ class MediaService:
             raise Exception(f"cannot save file, cannot write to database, filename={file.filename}, err: {e}")
         return media_id
 
-    async def get_file_by_media_id(self, media_id: str)-> MediaGetDto:
+    async def get_by_media_id(self, media_id: str)-> MediaGetDto:
         """
-        use media_id to return file binary file
+        use media_id to search for file path
+        :param media_id:
         :return:
         """
         # check file in database

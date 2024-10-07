@@ -19,14 +19,25 @@ def nearby():
     """
     return OkResponse(msg='test ok')
 
-@router.post("/image-rec")
-def image_rec():
+@router.post("/match_by_poi")
+async def match_by_poi(dto: MatchPoiRequestDto):
     """
-    router for image recognition api
+    match poi by poi identify image self
+    the photo taken will be matched by specific image of poi, if success, return good else return bad
     :return:
     """
-    return OkResponse(msg='test ok')
+    try:
+        await poi_service.match_by_poi(dto.poi_id, dto.image_media_id)
+    except Exception as e:
+        log.error(f"match poi error, err: {e}")
+        return ServerErrorResponse(msg=f"match poi error, err: {e}")
 
+@router.post("/match_by_location")
+async def match_by_location(dto: MatchLocationRequestDto):
+    """
+    match a poi by location (long and lat) and image
+    :return:
+    """
 
 @router.post("/poi")
 async def add_poi(dto: AddPoiRequestDto):

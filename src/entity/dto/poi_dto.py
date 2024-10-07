@@ -16,11 +16,15 @@ class NearbyRequestDto(BaseModel):
     long: float
 
 
-class ImageRecRequestDto(BaseModel):
+class MatchPoiRequestDto(BaseModel):
+    poi_id: str
+    image_media_id: str
+
+class MatchLocationRequestDto(BaseModel):
     lat: float
     long: float
-    image: str
-
+    ssid: str
+    image_media_id: str
 
 # RESPONSE DTO
 

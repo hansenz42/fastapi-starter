@@ -40,7 +40,7 @@ async def get_media(media_id: str):
     :return:
     """
     try:
-        media_dto: MediaGetDto = await media_service.get_file_by_media_id(media_id)
+        media_dto: MediaGetDto = await media_service.get_by_media_id(media_id)
         return FileResponse(media_type=media_dto.content_type, filename=media_dto.file_name, path=media_dto.file_path)
     except Exception as e:
         log.error(f"get file error, media_id={media_id}, err: {e}")
