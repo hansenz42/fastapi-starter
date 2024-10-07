@@ -13,7 +13,7 @@ T = TypeVar('T', bound=BaseModel)
 class OkResponse(BaseModel, Generic[T]):
     code: int = 200
     msg: str = "ok"
-    data: T | None = None
+    data: dict | None = None
 
 
 class ServerErrorResponse(BaseModel):
