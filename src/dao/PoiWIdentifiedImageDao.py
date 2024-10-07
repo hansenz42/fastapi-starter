@@ -1,5 +1,5 @@
 from component.SqlConnectorManager import sql_connection_manager
-from entity.po.PoiWIdentifyImagePo import PoiWIdentifyImagePo
+from entity.po.PoiIdentifyImagePo import PoiWIdentifyImagePo
 from sqlalchemy import select
 from datetime import datetime
 

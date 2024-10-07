@@ -1,0 +1,12 @@
+### add new poi
+POST {{base_url}}/api/poi/v1/poi
+Content-Type: application/json
+
+{
+    "name": "test",
+    "lat": 10.10,
+    "long": 10.10,
+    "ssid": "123",
+    "content": "{\"content\":\"test\"}",
+    "img_list": "[\"test_media_id\"]"
+}

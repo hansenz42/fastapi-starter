@@ -1,9 +1,13 @@
 # routers for process poi information, and poi crud
 
 from fastapi import APIRouter, Request, HTTPException, Header
-from common.response import OkResponse
+from common.response import OkResponse, ServerErrorResponse
 from entity.dto.poi_dto import *
 from service.PoiService import poi_service
+from component.LogManager import log_manager
+
+
+log = log_manager.get_logger(__name__)
 
 router = APIRouter()
 
@@ -25,9 +29,14 @@ def image_rec():
 
 
 @router.post("/poi")
-def add_poi(dto: AddPoiRequestDto):
+async def add_poi(dto: AddPoiRequestDto):
     """
     router for recording new poi
     :return:
     """
-    return poi_service.add_new_poi(dto)
+    try:
+        new_uuid = await poi_service.add_new_poi(dto)
+        return OkResponse(msg='ok', data={'poi_id': new_uuid})
+    except Exception as e:
+        log.error(f"add poi error, err: {e}")
+        return ServerErrorResponse(msg=f"add poi error, err: {e}")

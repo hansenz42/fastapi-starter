@@ -6,7 +6,7 @@ from numpy.ma.core import resize
 
 from dao.PoiWIdentifiedImageDao import poi_w_identified_image_dao
 from common.uuid import gen_uuid
-from entity.po.PoiWIdentifyImagePo import PoiWIdentifyImagePo
+from entity.po.PoiIdentifyImagePo import PoiWIdentifyImagePo
 from component.LogManager import log_manager
 
 log = log_manager.get_logger(__name__)

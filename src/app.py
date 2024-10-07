@@ -24,6 +24,7 @@ from route.media_v1 import router as media_router
 from route.poi_v1 import router as poi_router
 app.include_router(user_router, prefix="/api/user/v1", tags=['user'])
 app.include_router(media_router, prefix='/api/media/v1', tags=['media'])
+app.include_router(poi_router, prefix='/api/poi/v1', tags=['poi'])
 
 
 @asynccontextmanager

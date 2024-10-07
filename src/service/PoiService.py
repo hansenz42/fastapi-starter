@@ -12,7 +12,9 @@ class PoiService:
         pass
 
     async def add_new_poi(self, dto: AddPoiRequestDto):
-        new_uuid = await poi_dao.add_po(
+        new_uuid = 'POI_' + gen_uuid()
+        await poi_dao.add_po(
+            uuid=new_uuid,
             name=dto.name,
             lat=dto.lat,
             long=dto.long,

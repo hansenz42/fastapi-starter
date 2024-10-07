@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, LargeBinary, DateTime
 from entity.po.BasePo import BasePo
 
 class PoiWIdentifyImagePo(BasePo):
-    __tablename__ = 'poi_w_identify_image'
+    __tablename__ = 'poi_identify_image'
 
     poi_uuid = Column(String(255))
     image_uuid = Column(String(255))
